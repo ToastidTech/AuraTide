@@ -58,3 +58,18 @@
 - All localStorage / Share / Clipboard calls guarded with try/catch + fallbacks.
 - No console errors by construction (no undefined refs; all `$()` ids exist in markup).
 - Not deployed, no repo created, no DNS touched — prototype only.
+
+## 2026-09-24 — Sean's UI feedback round
+- Compacted UI: cards (18px→14px padding), dice (96×112→84×98), headings
+  (34px→29px), buttons, chart cells, section spacing.
+- Added footer: "POWERED by Toastid Tech, LLC" (bottom of main view).
+- Added promo-code section to the Premium sheet. Boss code TST2026 unlocks
+  premium client-side (unlimited oracle rolls + a genuinely computed
+  tomorrow's preview). Compatibility stays a Phase-2 placeholder.
+  NOTE: the code is visible in page source — fine for a boss code; move
+  entitlement server-side with the PayPal webhook in Phase 2.
+- Profile persistence verified working (localStorage auratide_profile;
+  onboarding skipped on launch when present; 15/15 smoke-test assertions
+  pass). If Sean is asked to re-enter, likely cause is opening a different
+  URL/origin than the installed PWA (reinstalls wipe storage).
+- Service worker cache bumped to auratide-v3 so installed copies update.

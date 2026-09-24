@@ -1,0 +1,31 @@
+{
+  "background_color": "#04060c",
+  "description": "A personal daily horoscope and manifestation oracle, written in your stars.",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "name": "AuraTide \u2014 Your Daily Oracle",
+  "orientation": "portrait",
+  "scope": "./",
+  "short_name": "AuraTide",
+  "start_url": "./index.html",
+  "theme_color": "#04060c"
+}

@@ -50,17 +50,17 @@ body{
 .view.active{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .eyebrow{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--blue);margin:0 0 6px}
-h1.display{font-family:var(--serif);font-weight:400;font-size:34px;line-height:1.15;margin:0 0 10px}
+h1.display{font-family:var(--serif);font-weight:400;font-size:29px;line-height:1.15;margin:0 0 8px}
 h2.serif{font-family:var(--serif);font-weight:400;font-size:24px;margin:0 0 8px}
 p{margin:0 0 12px}
 .dim{color:var(--ink-dim)}
 .faint{color:var(--ink-faint)}
 .card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);
-  padding:18px;margin:14px 0;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  padding:14px;margin:10px 0;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .card.gold{border-color:rgba(255,212,121,.35)}
 .card.locked{position:relative;overflow:hidden}
 .blur{filter:blur(6px);user-select:none;pointer-events:none}
-.btn{display:block;width:100%;padding:15px 18px;border:0;border-radius:14px;cursor:pointer;
+.btn{display:block;width:100%;padding:13px 16px;border:0;border-radius:14px;cursor:pointer;
   font-size:16px;font-weight:700;font-family:var(--sans);text-align:center;
   background:linear-gradient(135deg,var(--blue),#4aa8ff);color:#02141a;
   box-shadow:0 6px 24px rgba(0,229,255,.28);transition:transform .12s ease,box-shadow .12s ease}
@@ -79,11 +79,11 @@ p{margin:0 0 12px}
 /* ---------- onboarding ---------- */
 #onboard{min-height:92dvh;display:flex;flex-direction:column;justify-content:center;padding:24px 0}
 .brandmark{text-align:center;margin-bottom:26px}
-.brandmark .moon{font-size:52px;line-height:1;
+.brandmark .moon{font-size:44px;line-height:1;
   background:linear-gradient(135deg,var(--blue),var(--violet));
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
   filter:drop-shadow(0 0 18px rgba(0,229,255,.5))}
-.brandmark h1{font-family:var(--serif);font-weight:400;font-size:40px;margin:10px 0 4px;letter-spacing:.04em}
+.brandmark h1{font-family:var(--serif);font-weight:400;font-size:34px;margin:10px 0 4px;letter-spacing:.04em}
 .brandmark p{color:var(--ink-dim);font-size:14px;letter-spacing:.22em;text-transform:uppercase;margin:0}
 .ob-step{display:none}
 .ob-step.active{display:block;animation:fadeUp .5s ease}
@@ -115,7 +115,7 @@ p{margin:0 0 12px}
   padding:6px 2px 2px;color:var(--ink)}
 .glance::before{content:"“";color:var(--blue)}
 .glance::after{content:"”";color:var(--blue)}
-.sec-label{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--blue);margin:18px 0 6px}
+.sec-label{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--blue);margin:14px 0 5px}
 .meter{margin:10px 0}
 .meter .row{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-dim);margin-bottom:5px}
 .meter .row b{color:var(--ink)}
@@ -130,10 +130,10 @@ p{margin:0 0 12px}
 
 /* ---------- oracle ---------- */
 .dice-row{display:flex;gap:12px;justify-content:center;margin:20px 0 8px}
-.die{width:96px;height:112px;border-radius:16px;background:linear-gradient(160deg,#101830,#070c1a);
+.die{width:84px;height:98px;border-radius:16px;background:linear-gradient(160deg,#101830,#070c1a);
   border:1px solid var(--card-border);display:flex;flex-direction:column;align-items:center;justify-content:center;
   box-shadow:0 8px 26px rgba(0,0,0,.5)}
-.die .glyph{font-size:40px;line-height:1;color:var(--gold);min-height:48px;display:flex;align-items:center}
+.die .glyph{font-size:34px;line-height:1;color:var(--gold);min-height:40px;display:flex;align-items:center}
 .die .cap{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);margin-top:8px}
 .die.rolling{animation:shake .12s infinite}
 @keyframes shake{0%{transform:translateY(0) rotate(0)}25%{transform:translateY(-4px) rotate(-2deg)}
@@ -154,7 +154,7 @@ p{margin:0 0 12px}
 /* ---------- you ---------- */
 .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
 .chart-cell{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
-  border-radius:14px;padding:13px;text-align:center}
+  border-radius:14px;padding:11px;text-align:center}
 .chart-cell .k{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-faint)}
 .chart-cell .v{font-family:var(--serif);font-size:20px;margin-top:5px}
 .chart-cell .s{font-size:26px}
@@ -172,6 +172,14 @@ p{margin:0 0 12px}
 .perk{display:flex;gap:12px;align-items:flex-start;margin:13px 0;font-size:15px}
 .perk .d{color:var(--gold);font-size:18px;line-height:1.4}
 .placeholder-note{font-size:12px;color:var(--ink-faint);text-align:center;margin-top:14px;line-height:1.5}
+.promo{margin:18px 0 6px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)}
+.promo-row{display:flex;gap:10px}
+.promo-row input{flex:1;min-width:0;padding:13px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.05);color:var(--ink);font-size:16px;font-family:var(--sans);
+  letter-spacing:.1em;text-transform:uppercase}
+.promo-row input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,212,121,.15)}
+.promo-row input::placeholder{letter-spacing:0;text-transform:none;color:var(--ink-faint)}
+#btn-promo-apply{width:auto;flex-shrink:0;padding:13px 20px}
 .close-x{position:absolute}
 .sheet-wrap{position:relative;width:100%;max-width:480px}
 .sheet-x{position:absolute;top:14px;right:18px;background:none;border:0;color:var(--ink-faint);font-size:22px;cursor:pointer;z-index:2}
@@ -182,6 +190,10 @@ p{margin:0 0 12px}
   padding:12px 20px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;
   transition:opacity .25s,transform .25s;max-width:86vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%)}
+
+.brand-foot{text-align:center;font-size:11px;letter-spacing:.24em;color:var(--ink-faint);
+  padding:24px 0 6px}
+.brand-foot b{color:var(--ink-dim)}
 
 @media (min-width:520px){
   #app{padding-left:24px;padding-right:24px}
@@ -275,10 +287,17 @@ p{margin:0 0 12px}
         <p class="sec-label">Today's energies</p>
         <div id="meters"></div>
       </div>
-      <div class="card locked">
+      <div class="card locked" id="tomorrow-card">
         <p class="eyebrow">Tomorrow's tide</p>
-        <div class="blur"><p>A door you thought was closed is about to crack open. Say yes before you're ready…</p></div>
-        <button class="btn gold" id="btn-tomorrow-lock" style="margin-top:12px">Unlock tomorrow's preview</button>
+        <div id="tomorrow-locked">
+          <div class="blur"><p>A door you thought was closed is about to crack open. Say yes before you're ready…</p></div>
+          <button class="btn gold" id="btn-tomorrow-lock" style="margin-top:12px">Unlock tomorrow's preview</button>
+        </div>
+        <div id="tomorrow-unlocked" style="display:none">
+          <p class="sec-label" style="margin-top:0">Tomorrow at a glance</p>
+          <p class="glance" id="tomorrow-glance"></p>
+          <p class="dim" style="font-size:13px;margin:8px 0 0" id="tomorrow-phase"></p>
+        </div>
       </div>
     </div>
 
@@ -364,6 +383,8 @@ p{margin:0 0 12px}
       <button class="tab" data-tab="you"><span class="ico">✦</span>You</button>
     </div></nav>
   </section>
+
+  <footer class="brand-foot">POWERED by <b>Toastid Tech, LLC</b></footer>
 </div>
 
 <!-- ============ PREMIUM SHEET ============ -->
@@ -378,7 +399,15 @@ p{margin:0 0 12px}
       <div class="perk"><span class="d">✦</span><span><b>Compatibility readings</b> — you, and anyone you choose.</span></div>
       <div class="perk"><span class="d">✦</span><span><b>Deeper daily readings</b> — longer, sharper, more personal.</span></div>
       <button class="btn gold" id="btn-premium-cta">Notify me at launch</button>
-      <p class="placeholder-note">PLACEHOLDER — no payment is processed. Phase 2 wires this screen to PayPal subscriptions. Tapping the button only saves your interest on this device.</p>
+      <div class="promo">
+        <p class="eyebrow" style="text-align:center">Have a promo code?</p>
+        <div class="promo-row">
+          <input id="promo-code" type="text" placeholder="Enter code" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="24">
+          <button class="btn gold" id="btn-promo-apply">Apply</button>
+        </div>
+        <p class="err" id="promo-err" style="text-align:center"></p>
+      </div>
+      <p class="placeholder-note" id="premium-note">PLACEHOLDER — no payment is processed. Phase 2 wires this screen to PayPal subscriptions. Tapping the button only saves your interest on this device.</p>
     </div>
   </div>
 </div>
@@ -805,6 +834,7 @@ function renderToday() {
   }));
   // stash today's one-liner for sharing
   store.set('todayGlance', { date: r.date, text: r.glance, pretty: r.pretty });
+  renderTomorrow();
 }
 
 /* ============ 7. ORACLE DICE ============ */
@@ -815,18 +845,21 @@ function rollHistory() { return store.get('rollHistory', []); }
 function updateOracleUI() {
   const today = localDateStr(new Date());
   const rolled = lastRollDate() === today;
+  const prem = isPremium();
   $('btn-roll').disabled = rolling;
-  $('btn-roll').textContent = rolling ? 'The dice are turning…' : (rolled ? 'Roll again (Premium)' : 'Roll the dice');
-  $('oracle-status').textContent = rolled
-    ? 'You\u2019ve used today\u2019s free roll. The gods rest until tomorrow — or upgrade.'
-    : 'One free roll each day.';
+  $('btn-roll').textContent = rolling ? 'The dice are turning…' : (rolled && !prem ? 'Roll again (Premium)' : 'Roll the dice');
+  $('oracle-status').textContent = prem
+    ? 'Premium: unlimited rolls. The gods are generous today.'
+    : (rolled
+      ? 'You\u2019ve used today\u2019s free roll. The gods rest until tomorrow — or upgrade.'
+      : 'One free roll each day.');
 }
 function doRoll() {
   if (rolling) return;
   const profile = getProfile();
   if (!profile) return;
   const today = localDateStr(new Date());
-  if (lastRollDate() === today) { openPremium(); return; } // freemium gate
+  if (lastRollDate() === today && !isPremium()) { openPremium(); return; } // freemium gate
   rolling = true;
   $('oracle-result').style.display = 'none';
   updateOracleUI();
@@ -957,6 +990,7 @@ function renderYou() {
   $('you-profile').textContent = profile.name + ' · ' + profile.birthDate +
     (profile.timeKnown ? ' at ' + profile.birthTime : ' (time unknown — chart cast for noon)') +
     ' · ' + profile.birthplace;
+  $('btn-premium-you').textContent = isPremium() ? '\u2726 Premium active' : 'AuraTide Premium';
 }
 
 /* ============ 10. PREMIUM (PLACEHOLDER) ============
@@ -966,8 +1000,55 @@ function renderYou() {
    via webhook, mirror the PulseMatrix/BiteFact pattern: PayPal REST app
    webhook -> server -> entitlement flag -> client unlocks features).
    Until then, the button only records local interest. */
-function openPremium() { $('premium').classList.add('open'); }
+function openPremium() {
+  const prem = isPremium();
+  $('btn-premium-cta').style.display = prem ? 'none' : '';
+  $('premium-note').textContent = prem
+    ? 'Premium is active on this device. The full tide is yours.'
+    : 'PLACEHOLDER — no payment is processed. Phase 2 wires this screen to PayPal subscriptions. Tapping the button only saves your interest on this device.';
+  $('premium').classList.add('open');
+}
 function closePremium() { $('premium').classList.remove('open'); }
+
+/* ============ 10a. PREMIUM UNLOCK (promo / boss code) ============
+   Phase 1: client-side code check. The code is visible to anyone
+   reading the page source — acceptable for a friends-and-family
+   boss code; Phase 2 moves entitlement server-side with the
+   PayPal webhook (same pattern as PulseMatrix/BiteFact). */
+const BOSS_CODE = 'TST2026';
+function isPremium() { return store.get('premiumUnlock', false) === true; }
+function applyPromo() {
+  const v = $('promo-code').value.trim().toUpperCase();
+  if (!v) { $('promo-err').textContent = 'Enter a code first.'; return; }
+  if (v === BOSS_CODE) {
+    store.set('premiumUnlock', true);
+    $('promo-err').textContent = '';
+    $('promo-code').value = '';
+    closePremium();
+    renderTomorrow();
+    updateOracleUI();
+    renderYou();
+    toast('Boss mode activated — the full tide is yours.');
+  } else {
+    $('promo-err').textContent = 'That code didn\u2019t work. Check it and try again.';
+  }
+}
+/* Tomorrow's preview: a genuinely computed reading for tomorrow,
+   unlocked for premium. Deterministic per (user, date) like today. */
+function renderTomorrow() {
+  const profile = getProfile();
+  if (!profile) return;
+  const prem = isPremium();
+  $('tomorrow-locked').style.display = prem ? 'none' : '';
+  $('tomorrow-unlocked').style.display = prem ? '' : 'none';
+  $('tomorrow-card').classList.toggle('locked', !prem);
+  if (prem) {
+    const t = new Date(); t.setDate(t.getDate() + 1);
+    const r = buildReading(profile, t);
+    $('tomorrow-glance').textContent = r.glance;
+    $('tomorrow-phase').textContent = r.phase.name + ' · ' + r.phase.illumination + '% illuminated';
+  }
+}
 
 /* ============ 11. STARFIELD + BOOT ============ */
 function toast(msg) {
@@ -1040,9 +1121,20 @@ function wireEvents() {
     $('onboard').classList.add('active');
     window.scrollTo(0, 0);
   });
-  // Freemium gates -> premium placeholder
-  ['btn-tomorrow-lock', 'btn-more-rolls', 'btn-compat-lock', 'btn-premium-you']
-    .forEach(id => $(id).addEventListener('click', openPremium));
+  // Freemium gates -> premium placeholder (or premium behavior)
+  $('btn-tomorrow-lock').addEventListener('click', openPremium);
+  $('btn-more-rolls').addEventListener('click', openPremium);
+  $('btn-compat-lock').addEventListener('click', () => {
+    if (isPremium()) toast('Compatibility readings arrive in Phase 2 — the stars are still aligning.');
+    else openPremium();
+  });
+  $('btn-premium-you').addEventListener('click', () => {
+    if (isPremium()) toast('Premium is active on this device.');
+    else openPremium();
+  });
+  // Promo code
+  $('btn-promo-apply').addEventListener('click', applyPromo);
+  $('promo-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') applyPromo(); });
   $('premium-close').addEventListener('click', closePremium);
   $('premium').addEventListener('click', (e) => { if (e.target === $('premium')) closePremium(); });
   $('btn-premium-cta').addEventListener('click', () => {
