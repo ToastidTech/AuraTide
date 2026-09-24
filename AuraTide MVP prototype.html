@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>AuraTide — Your Daily Oracle</title>
+<meta name="description" content="AuraTide: a personal daily horoscope and manifestation oracle, written in your stars.">
+<meta name="theme-color" content="#04060c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AuraTide">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+/* ============================================================
+   AuraTide — Phase 1 MVP styles
+   Dark premium futuristic · electric-blue accents
+   ============================================================ */
+:root{
+  --bg:#04060c;
+  --bg2:#0a0f1e;
+  --ink:#eaf2ff;
+  --ink-dim:#9aa7c7;
+  --ink-faint:#5b6785;
+  --blue:#00e5ff;
+  --blue-deep:#0aa2c0;
+  --violet:#7c6bff;
+  --gold:#ffd479;
+  --card:rgba(255,255,255,.045);
+  --card-border:rgba(0,229,255,.16);
+  --radius:18px;
+  --serif:Georgia,'Times New Roman',serif;
+  --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--sans);font-size:16px;line-height:1.55;
+  overflow-x:hidden;
+}
+/* starfield canvas sits behind everything */
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+#app{position:relative;z-index:1;max-width:480px;margin:0 auto;min-height:100dvh;
+  padding:0 18px calc(96px + env(safe-area-inset-bottom));}
+
+/* ---------- generic ---------- */
+.view{display:none;animation:fadeUp .45s ease}
+.view.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.eyebrow{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--blue);margin:0 0 6px}
+h1.display{font-family:var(--serif);font-weight:400;font-size:34px;line-height:1.15;margin:0 0 10px}
+h2.serif{font-family:var(--serif);font-weight:400;font-size:24px;margin:0 0 8px}
+p{margin:0 0 12px}
+.dim{color:var(--ink-dim)}
+.faint{color:var(--ink-faint)}
+.card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);
+  padding:18px;margin:14px 0;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.card.gold{border-color:rgba(255,212,121,.35)}
+.card.locked{position:relative;overflow:hidden}
+.blur{filter:blur(6px);user-select:none;pointer-events:none}
+.btn{display:block;width:100%;padding:15px 18px;border:0;border-radius:14px;cursor:pointer;
+  font-size:16px;font-weight:700;font-family:var(--sans);text-align:center;
+  background:linear-gradient(135deg,var(--blue),#4aa8ff);color:#02141a;
+  box-shadow:0 6px 24px rgba(0,229,255,.28);transition:transform .12s ease,box-shadow .12s ease}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:transparent;color:var(--blue);border:1px solid var(--card-border);box-shadow:none}
+.btn.gold{background:linear-gradient(135deg,var(--gold),#ffb84d);color:#241a02;box-shadow:0 6px 24px rgba(255,212,121,.25)}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.field{margin:0 0 16px}
+.field label{display:block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:7px}
+.field input{width:100%;padding:14px 15px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.05);color:var(--ink);font-size:16px;font-family:var(--sans)}
+.field input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,229,255,.18)}
+.field .hint{font-size:13px;color:var(--ink-faint);margin-top:6px}
+.err{color:#ff8fa3;font-size:13px;min-height:18px;margin:4px 0 0}
+
+/* ---------- onboarding ---------- */
+#onboard{min-height:92dvh;display:flex;flex-direction:column;justify-content:center;padding:24px 0}
+.brandmark{text-align:center;margin-bottom:26px}
+.brandmark .moon{font-size:52px;line-height:1;
+  background:linear-gradient(135deg,var(--blue),var(--violet));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 18px rgba(0,229,255,.5))}
+.brandmark h1{font-family:var(--serif);font-weight:400;font-size:40px;margin:10px 0 4px;letter-spacing:.04em}
+.brandmark p{color:var(--ink-dim);font-size:14px;letter-spacing:.22em;text-transform:uppercase;margin:0}
+.ob-step{display:none}
+.ob-step.active{display:block;animation:fadeUp .5s ease}
+.dots{display:flex;gap:8px;justify-content:center;margin:22px 0}
+.dots span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.18)}
+.dots span.on{background:var(--blue);box-shadow:0 0 10px var(--blue)}
+.ob-nav{display:flex;gap:10px;margin-top:6px}
+.ob-nav .btn{flex:1}
+
+/* ---------- header / tabs ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 0 4px}
+.topbar .wordmark{font-family:var(--serif);font-size:22px;letter-spacing:.05em}
+.topbar .wordmark b{color:var(--blue);font-weight:400}
+.streak-pill{display:flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;
+  background:rgba(0,229,255,.08);border:1px solid var(--card-border);font-size:14px;font-weight:700}
+.streak-pill .flame{font-size:16px}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:5;
+  background:rgba(4,6,12,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-top:1px solid rgba(0,229,255,.12);padding:8px 6px calc(10px + env(safe-area-inset-bottom))}
+.tabbar-inner{max-width:480px;margin:0 auto;display:flex}
+.tab{flex:1;background:none;border:0;color:var(--ink-faint);font-family:var(--sans);
+  font-size:11px;letter-spacing:.06em;padding:8px 0 4px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:4px}
+.tab .ico{font-size:21px;line-height:1}
+.tab.on{color:var(--blue)}
+
+/* ---------- today ---------- */
+.glance{font-family:var(--serif);font-size:21px;line-height:1.45;font-style:italic;
+  padding:6px 2px 2px;color:var(--ink)}
+.glance::before{content:"“";color:var(--blue)}
+.glance::after{content:"”";color:var(--blue)}
+.sec-label{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--blue);margin:18px 0 6px}
+.meter{margin:10px 0}
+.meter .row{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-dim);margin-bottom:5px}
+.meter .row b{color:var(--ink)}
+.meter .bar{height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.meter .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue-deep),var(--blue));
+  box-shadow:0 0 12px rgba(0,229,255,.5);width:0;transition:width 1.1s cubic-bezier(.2,.8,.2,1)}
+.shadow-note{border-left:3px solid var(--gold);padding:10px 14px;margin:16px 0;
+  background:rgba(255,212,121,.06);border-radius:0 12px 12px 0}
+.shadow-note .t{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.phase-line{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-dim);margin:4px 0 0}
+.phase-line .ph{font-size:22px;color:var(--blue)}
+
+/* ---------- oracle ---------- */
+.dice-row{display:flex;gap:12px;justify-content:center;margin:20px 0 8px}
+.die{width:96px;height:112px;border-radius:16px;background:linear-gradient(160deg,#101830,#070c1a);
+  border:1px solid var(--card-border);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:0 8px 26px rgba(0,0,0,.5)}
+.die .glyph{font-size:40px;line-height:1;color:var(--gold);min-height:48px;display:flex;align-items:center}
+.die .cap{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);margin-top:8px}
+.die.rolling{animation:shake .12s infinite}
+@keyframes shake{0%{transform:translateY(0) rotate(0)}25%{transform:translateY(-4px) rotate(-2deg)}
+  50%{transform:translateY(2px) rotate(2deg)}75%{transform:translateY(-2px) rotate(-1deg)}100%{transform:translateY(0)}}
+.die.settled{border-color:rgba(255,212,121,.55);box-shadow:0 0 22px rgba(255,212,121,.18)}
+.oracle-msg{font-family:var(--serif);font-size:19px;line-height:1.6}
+.oracle-msg .who{color:var(--gold)}
+.hist{font-size:13px;color:var(--ink-dim);border-top:1px solid rgba(255,255,255,.07);padding:10px 0}
+.hist b{color:var(--ink)}
+
+/* ---------- ritual ---------- */
+.moon-wrap{display:flex;align-items:center;gap:16px;margin:8px 0 4px}
+.moon-big{font-size:64px;line-height:1;filter:drop-shadow(0 0 16px rgba(0,229,255,.45))}
+.streak-num{font-family:var(--serif);font-size:44px;line-height:1}
+.share-row{display:flex;gap:10px}
+.share-row .btn{flex:1}
+
+/* ---------- you ---------- */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.chart-cell{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+  border-radius:14px;padding:13px;text-align:center}
+.chart-cell .k{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-faint)}
+.chart-cell .v{font-family:var(--serif);font-size:20px;margin-top:5px}
+.chart-cell .s{font-size:26px}
+
+/* ---------- premium modal ---------- */
+#premium{position:fixed;inset:0;z-index:20;display:none;align-items:flex-end;justify-content:center;
+  background:rgba(2,4,10,.72);backdrop-filter:blur(4px)}
+#premium.open{display:flex}
+.sheet{width:100%;max-width:480px;background:#0a1020;border:1px solid rgba(255,212,121,.3);
+  border-bottom:0;border-radius:24px 24px 0 0;padding:26px 22px calc(30px + env(safe-area-inset-bottom));
+  animation:slideUp .35s ease}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
+.sheet h2{font-family:var(--serif);font-weight:400;font-size:28px;margin:0 0 6px;text-align:center}
+.sheet h2 .g{color:var(--gold)}
+.perk{display:flex;gap:12px;align-items:flex-start;margin:13px 0;font-size:15px}
+.perk .d{color:var(--gold);font-size:18px;line-height:1.4}
+.placeholder-note{font-size:12px;color:var(--ink-faint);text-align:center;margin-top:14px;line-height:1.5}
+.close-x{position:absolute}
+.sheet-wrap{position:relative;width:100%;max-width:480px}
+.sheet-x{position:absolute;top:14px;right:18px;background:none;border:0;color:var(--ink-faint);font-size:22px;cursor:pointer;z-index:2}
+
+/* ---------- toast ---------- */
+#toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);z-index:30;
+  background:#101a30;border:1px solid var(--card-border);color:var(--ink);
+  padding:12px 20px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .25s;max-width:86vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+
+@media (min-width:520px){
+  #app{padding-left:24px;padding-right:24px}
+}
+</style>
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div id="app">
+
+  <!-- ============ ONBOARDING ============ -->
+  <section id="onboard" class="view">
+    <div class="brandmark">
+      <div class="moon">☾</div>
+      <h1>AuraTide</h1>
+      <p>Your daily oracle</p>
+    </div>
+
+    <div class="ob-step active" data-step="0">
+      <p class="eyebrow">The ritual begins</p>
+      <h1 class="display">The stars need<br>a name to whisper.</h1>
+      <p class="dim">What should the tide call you?</p>
+      <div class="field">
+        <label for="ob-name">Your name</label>
+        <input id="ob-name" type="text" autocomplete="given-name" maxlength="30" placeholder="e.g. Sean">
+        <p class="err" id="err-name"></p>
+      </div>
+    </div>
+
+    <div class="ob-step" data-step="1">
+      <p class="eyebrow">Your cosmic coordinates</p>
+      <h1 class="display">When did you<br>arrive?</h1>
+      <p class="dim">Your birth moment sets the sky the oracle reads from.</p>
+      <div class="field">
+        <label for="ob-date">Birth date</label>
+        <input id="ob-date" type="date" min="1900-01-01">
+        <p class="err" id="err-date"></p>
+      </div>
+      <div class="field">
+        <label for="ob-time">Birth time</label>
+        <input id="ob-time" type="time" value="12:00">
+        <p class="hint">Don't know it? Leave it at noon — the oracle understands.</p>
+      </div>
+    </div>
+
+    <div class="ob-step" data-step="2">
+      <p class="eyebrow">Where the sky met you</p>
+      <h1 class="display">Where did you<br>first see the sky?</h1>
+      <p class="dim">Your birthplace anchors your chart to the Earth.</p>
+      <div class="field">
+        <label for="ob-place">Birthplace</label>
+        <input id="ob-place" type="text" maxlength="60" placeholder="e.g. Van Buren, Arkansas">
+        <p class="err" id="err-place"></p>
+      </div>
+      <p class="dim" style="font-size:13px">This stays on your device. AuraTide never sends your birth data anywhere.</p>
+    </div>
+
+    <div class="dots" id="ob-dots"><span class="on"></span><span></span><span></span></div>
+    <div class="ob-nav">
+      <button class="btn ghost" id="ob-back" style="display:none">Back</button>
+      <button class="btn" id="ob-next">Continue</button>
+    </div>
+  </section>
+
+  <!-- ============ MAIN ============ -->
+  <section id="main" class="view">
+    <div class="topbar">
+      <div class="wordmark">Aura<b>Tide</b></div>
+      <div class="streak-pill" id="streak-pill" title="Daily ritual streak"><span class="flame">☾</span><span id="streak-num">0</span></div>
+    </div>
+
+    <!-- TODAY -->
+    <div class="tabview" id="tab-today">
+      <p class="eyebrow" id="today-eyebrow">Today</p>
+      <h1 class="display" id="today-title">Today for you</h1>
+      <div class="phase-line"><span class="ph" id="today-phase-glyph">☽</span><span id="today-phase-text"></span></div>
+      <div class="card">
+        <p class="sec-label" style="margin-top:0">Day at a glance</p>
+        <p class="glance" id="glance"></p>
+      </div>
+      <div class="card" id="reading-card">
+        <p class="eyebrow">Your reading</p>
+        <p id="reading-open"></p>
+        <p class="sec-label">Love</p><p id="reading-love"></p>
+        <p class="sec-label">Focus</p><p id="reading-focus"></p>
+        <p class="sec-label">Luck</p><p id="reading-luck"></p>
+        <div class="shadow-note">
+          <div class="t">A harder truth</div>
+          <p id="reading-shadow" style="margin:0"></p>
+        </div>
+        <p class="sec-label">Today's energies</p>
+        <div id="meters"></div>
+      </div>
+      <div class="card locked">
+        <p class="eyebrow">Tomorrow's tide</p>
+        <div class="blur"><p>A door you thought was closed is about to crack open. Say yes before you're ready…</p></div>
+        <button class="btn gold" id="btn-tomorrow-lock" style="margin-top:12px">Unlock tomorrow's preview</button>
+      </div>
+    </div>
+
+    <!-- ORACLE -->
+    <div class="tabview" id="tab-oracle" style="display:none">
+      <p class="eyebrow">The horoscope dice</p>
+      <h1 class="display">Ask the gods.</h1>
+      <p class="dim">Three dice. Planet, sign, house. One answer, addressed to you.</p>
+      <div class="card">
+        <div class="dice-row">
+          <div class="die" id="die0"><div class="glyph">☉</div><div class="cap">Planet</div></div>
+          <div class="die" id="die1"><div class="glyph">♈</div><div class="cap">Sign</div></div>
+          <div class="die" id="die2"><div class="glyph">Ⅰ</div><div class="cap">House</div></div>
+        </div>
+        <p class="faint" style="text-align:center;font-size:13px" id="oracle-status">One free roll each day.</p>
+        <button class="btn gold" id="btn-roll">Roll the dice</button>
+      </div>
+      <div class="card gold" id="oracle-result" style="display:none">
+        <p class="eyebrow">The gods answer</p>
+        <p class="oracle-msg" id="oracle-text"></p>
+        <p class="faint" style="font-size:12px;margin:10px 0 0" id="oracle-combo"></p>
+      </div>
+      <div class="card">
+        <p class="eyebrow">Recent rolls</p>
+        <div id="oracle-history"><p class="faint" style="font-size:13px">No rolls yet. The dice are waiting.</p></div>
+      </div>
+      <button class="btn ghost" id="btn-more-rolls">Unlimited rolls</button>
+    </div>
+
+    <!-- RITUAL -->
+    <div class="tabview" id="tab-ritual" style="display:none">
+      <p class="eyebrow">Daily ritual</p>
+      <h1 class="display">Keep the tide<br>coming in.</h1>
+      <div class="card">
+        <div class="moon-wrap">
+          <div class="moon-big" id="ritual-moon">☾</div>
+          <div>
+            <div class="streak-num"><span id="ritual-streak">0</span> <span style="font-size:18px" class="dim">days</span></div>
+            <p class="dim" style="margin:2px 0 0;font-size:13px">Check in daily to grow your streak.<br>Streaks keep the oracle's favor.</p>
+          </div>
+        </div>
+        <button class="btn" id="btn-checkin" style="margin-top:14px">Check in with the tide</button>
+      </div>
+      <div class="card">
+        <p class="eyebrow">Share today's tide</p>
+        <p class="dim" style="font-size:14px">Send your day-at-a-glance to someone who needs it.</p>
+        <div class="share-row">
+          <button class="btn ghost" id="btn-share">Share</button>
+        </div>
+      </div>
+      <div class="card locked">
+        <p class="eyebrow">Compatibility</p>
+        <div class="blur"><p>You and them: a slow-burning fire neither of you wants to name. This week…</p></div>
+        <button class="btn gold" id="btn-compat-lock" style="margin-top:12px">Unlock compatibility readings</button>
+      </div>
+    </div>
+
+    <!-- YOU -->
+    <div class="tabview" id="tab-you" style="display:none">
+      <p class="eyebrow">Your chart</p>
+      <h1 class="display" id="you-title">You, in the sky</h1>
+      <div class="card">
+        <div class="chart-grid">
+          <div class="chart-cell"><div class="k">Sun</div><div class="s" id="you-sun-glyph">☉</div><div class="v" id="you-sun">—</div></div>
+          <div class="chart-cell"><div class="k">Moon</div><div class="s" id="you-moon-glyph">☽</div><div class="v" id="you-moon">—</div></div>
+        </div>
+        <p class="dim" style="font-size:14px" id="you-born"></p>
+        <p class="faint" style="font-size:12px">Sun sign from true solar longitude · Moon sign from lunar longitude (Meeus low-precision, ±0.3°). Ascendant arrives in Phase 2 with precise location data.</p>
+      </div>
+      <div class="card">
+        <p class="eyebrow">Profile</p>
+        <p class="dim" style="font-size:14px" id="you-profile"></p>
+        <button class="btn ghost" id="btn-edit">Edit birth details</button>
+      </div>
+      <button class="btn ghost" id="btn-premium-you">AuraTide Premium</button>
+    </div>
+
+    <!-- bottom tab bar -->
+    <nav class="tabbar"><div class="tabbar-inner">
+      <button class="tab on" data-tab="today"><span class="ico">☀</span>Today</button>
+      <button class="tab" data-tab="oracle"><span class="ico">⚄</span>Oracle</button>
+      <button class="tab" data-tab="ritual"><span class="ico">☾</span>Ritual</button>
+      <button class="tab" data-tab="you"><span class="ico">✦</span>You</button>
+    </div></nav>
+  </section>
+</div>
+
+<!-- ============ PREMIUM SHEET ============ -->
+<div id="premium" role="dialog" aria-modal="true" aria-label="AuraTide Premium">
+  <div class="sheet-wrap">
+    <button class="sheet-x" id="premium-close" aria-label="Close">✕</button>
+    <div class="sheet">
+      <h2>AuraTide <span class="g">Premium</span></h2>
+      <p class="dim" style="text-align:center;font-size:14px">The full tide, every day.</p>
+      <div class="perk"><span class="d">✦</span><span><b>Unlimited oracle rolls</b> — ask the gods as often as you like.</span></div>
+      <div class="perk"><span class="d">✦</span><span><b>Tomorrow's preview</b> — see the next tide before it arrives.</span></div>
+      <div class="perk"><span class="d">✦</span><span><b>Compatibility readings</b> — you, and anyone you choose.</span></div>
+      <div class="perk"><span class="d">✦</span><span><b>Deeper daily readings</b> — longer, sharper, more personal.</span></div>
+      <button class="btn gold" id="btn-premium-cta">Notify me at launch</button>
+      <p class="placeholder-note">PLACEHOLDER — no payment is processed. Phase 2 wires this screen to PayPal subscriptions. Tapping the button only saves your interest on this device.</p>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+
+<script>
+'use strict';
+/* ================================================================
+   AuraTide — Phase 1 MVP application logic
+   ----------------------------------------------------------------
+   SECTIONS:
+     1. Safe storage helpers
+     2. Seeded RNG (stable-per-day readings)
+     3. Real astronomy: Sun sign, Moon sign, Moon phase
+        (Ascendant intentionally omitted — see note in §3)
+     4. Local copy engine (Barnum mechanics)
+        -- PHASE-2 HOOK: OpenAI proxy plugs in here --
+     5. Onboarding
+     6. Today view (daily reading)
+     7. Oracle dice
+     8. Ritual (check-in / streak / share)
+     9. You view (chart + profile)
+    10. Premium placeholder
+    11. Starfield + boot
+   ================================================================ */
+
+/* ============ 1. SAFE STORAGE ============ */
+const LS_PREFIX = 'auratide_';
+const store = {
+  get(key, fallback) {
+    try {
+      const v = localStorage.getItem(LS_PREFIX + key);
+      return v === null ? fallback : JSON.parse(v);
+    } catch (e) { return fallback; }
+  },
+  set(key, val) {
+    try { localStorage.setItem(LS_PREFIX + key, JSON.stringify(val)); return true; }
+    catch (e) { return false; }
+  },
+  del(key) { try { localStorage.removeItem(LS_PREFIX + key); } catch (e) {} }
+};
+
+/* ============ 2. SEEDED RNG ============
+   xmur3 string hash + mulberry32 PRNG.
+   Seed = birthDate + '|' + localDateString  ->  stable all day,
+   unique per user, fresh every calendar day. */
+function xmur3(str) {
+  let h = 1779033703 ^ str.length;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  return function () {
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return (h ^= h >>> 16) >>> 0;
+  };
+}
+function mulberry32(a) {
+  return function () {
+    let t = (a += 0x6D2B79F5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function rngFor(seedStr) { return mulberry32(xmur3(seedStr)()); }
+function pick(rng, arr) { return arr[Math.floor(rng() * arr.length)]; }
+function localDateStr(d) {
+  const p = (n) => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+}
+function prettyDate(d) {
+  return d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
+/* ============ 3. REAL ASTRONOMY ============
+   All computations below are genuine (low-precision but honest)
+   celestial mechanics — no invented placements.
+   - Sun sign: true solar ecliptic longitude -> tropical sign.
+   - Moon sign: lunar ecliptic longitude via the truncated Meeus
+     low-precision series (6 longitude terms, ~±0.3° accuracy —
+     wrong only within ~0.3° of a sign cusp, <1% of births).
+   - Moon phase: synodic cycle from a known new-moon epoch. */
+const SIGNS = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo',
+               'Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+const SIGN_GLYPHS = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+const DEG = Math.PI / 180;
+function norm360(x) { x %= 360; return x < 0 ? x + 360 : x; }
+function daysSinceJ2000(date) {
+  // J2000.0 = 2000-01-01 12:00 TT; ms epoch of 1970-01-01 -> 10957.5 days
+  return date.getTime() / 86400000 - 10957.5;
+}
+function sunLongitude(date) {
+  const T = daysSinceJ2000(date) / 36525;
+  const L0 = norm360(280.46646 + 36000.76983 * T);
+  const M  = norm360(357.52911 + 35999.05029 * T) * DEG;
+  const C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(M)
+          + (0.019993 - 0.000101 * T) * Math.sin(2 * M)
+          + 0.000289 * Math.sin(3 * M);
+  return norm360(L0 + C);
+}
+function sunSignIndex(date) { return Math.floor(sunLongitude(date) / 30) % 12; }
+function moonLongitude(date) {
+  const T = daysSinceJ2000(date) / 36525;
+  const Lm = norm360(218.3164477 + 481267.88123421 * T) * DEG; // mean longitude
+  const Mm = norm360(134.9633964 + 477198.8675055 * T) * DEG;  // mean anomaly
+  const D  = norm360(297.8501921 + 445267.1114034 * T) * DEG;  // mean elongation
+  const Ms = norm360(357.5291092 + 35999.0502909 * T) * DEG;   // sun mean anomaly
+  const F  = norm360(93.2720950  + 483202.0175233 * T) * DEG;  // arg of latitude
+  // Truncated Meeus Table 47.A — the six largest longitude terms.
+  const lon =
+    Lm / DEG
+    + 6.288774 * Math.sin(Mm)
+    + 1.274027 * Math.sin(2 * D - Mm)   // evection
+    + 0.658314 * Math.sin(2 * D)
+    + 0.213618 * Math.sin(2 * Mm)
+    - 0.185116 * Math.sin(Ms)
+    - 0.114332 * Math.sin(2 * F);
+  return norm360(lon);
+}
+function moonSignIndex(date) { return Math.floor(moonLongitude(date) / 30) % 12; }
+/* Moon phase: synodic month 29.530588853 d from the new moon of
+   2000-01-06 18:14 UTC (JD 2451550.26). */
+const NEW_MOON_EPOCH_MS = Date.UTC(2000, 0, 6, 18, 14);
+const SYNODIC = 29.530588853;
+function moonPhase(date) {
+  const age = (((date.getTime() - NEW_MOON_EPOCH_MS) / 86400000) % SYNODIC + SYNODIC) % SYNODIC;
+  const illum = Math.round((1 - Math.cos((age / SYNODIC) * 2 * Math.PI)) / 2 * 100);
+  const eighths = Math.floor(((age / SYNODIC) * 8 + 0.5)) % 8;
+  const names = ['New Moon','Waxing Crescent','First Quarter','Waxing Gibbous',
+                 'Full Moon','Waning Gibbous','Last Quarter','Waning Crescent'];
+  const glyphs = ['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'];
+  return { name: names[eighths], glyph: glyphs[eighths], illumination: illum, age: age };
+}
+/* NOTE — Ascendant: intentionally OMITTED in Phase 1.
+   An honest ascendant needs the observer's latitude/longitude plus
+   local sidereal time. Birthplace is free text and the app is fully
+   offline (no geocoding), so any ascendant shown would be fabricated.
+   PHASE-2 HOOK: geocode birthplace (server-side or bundled gazetteer)
+   -> compute ascendant from lat/lon + birth time + sidereal time,
+   display as the third chart pillar. Never fake it. */
+
+/* ============ 4. LOCAL COPY ENGINE (Barnum mechanics) ============
+   Research-backed formula (Forer 1948, avg 4.26/5 perceived accuracy):
+   - second-person "you" language throughout
+   - mostly flattering + ONE mild uncomfortable truth (credibility)
+   - claims that sound unique while staying universal
+   - anchored to REAL computed inputs: sun sign, moon sign,
+     today's actual moon phase, the user's name
+   ------------------------------------------------------------------
+   -- PHASE-2 HOOK: OpenAI proxy ------------------------------------
+   To replace this template engine with generated copy:
+     1. Client builds chartContext = { name, sunSign, moonSign,
+        moonPhaseToday, birthDate, birthTime, birthplace,
+        diceRoll? } — NEVER an API key.
+     2. Client POSTs chartContext to YOUR server endpoint
+        (e.g. POST /api/reading) over HTTPS.
+     3. The SERVER holds the OpenAI API key, calls the model with a
+        system prompt enforcing the Barnum voice (flattering + one
+        gentle truth, second person, weave in the chart facts),
+        and returns { paragraphs, energies, oneLiner, oracleText }.
+     4. Client renders the response exactly like the local engine's
+        output below. Keep this local engine as the offline fallback.
+   ------------------------------------------------------------------ */
+const COPY = {
+openers: [
+  "{name}, with the Sun in {sun} and the Moon in {moon}, you were built for days exactly like this one.",
+  "The {phase} moon is pulling at your {moon} Moon tonight, {name} — and your {sun} Sun knows precisely what to do with that tension.",
+  "Most people drift through a {phase}. You won't, {name}. Your {sun} Sun doesn't do drifting.",
+  "{name}, your {moon} Moon has been quiet lately — too quiet. Today's {phase} wakes it up.",
+  "There is a version of you that only appears under a {phase}, {name}. Your {sun} heart has been waiting for it.",
+  "Your chart has been holding its breath, {name}. Sun in {sun}, Moon in {moon} — today it exhales.",
+  "{name}, the sky arranged itself carefully on the day you arrived. The {phase} is its way of reminding you.",
+  "People with your {sun} Sun and {moon} Moon don't get ordinary Tuesdays, {name}. Today is proof.",
+  "The {phase} doesn't impress everyone, {name}. But it was practically made for a {sun} like you.",
+  "Something in your {moon} Moon stirs under this {phase}, {name} — listen before the day gets loud."
+],
+love: [
+  "In love, you give more than you admit — and you notice everything. Today someone is paying closer attention to you than you realize; let them. Your {moon} Moon makes you magnetic when you stop performing and simply receive.",
+  "You love like a {sun}: fully, or not at all. There's no half-measure in you, and the right person has always known it. Today, a small gesture — a text, a glance — carries more weight than a grand one. Don't miss it.",
+  "Your heart has excellent instincts and terrible patience, {name}. Under this {phase}, an old connection resurfaces in your thoughts. You don't have to act on it. Just notice what the feeling is trying to tell you about what you actually want.",
+  "You are more romantic than your reputation suggests. Today favors the quiet kind of intimacy: the inside joke, the remembered detail. Someone is keeping score of how well you listen — and you're winning.",
+  "The {phase} softens your {moon} Moon's defenses, {name}. If you've been waiting for permission to be vulnerable with someone, this is it. The risk is smaller than your pride says it is.",
+  "You don't fall for people; you recognize them. That instant knowing is your {sun} Sun at work. Today, trust the first impression you tried to talk yourself out of — it was right.",
+  "Love has been asking you to be braver, not busier. One honest conversation today does more for your heart than a week of wondering. Your {moon} Moon already knows the words.",
+  "Someone admires the way you carry yourself when you think nobody's watching. Under the {phase}, hidden admiration has a way of surfacing. Stay open past your usual closing time.",
+  "You've been protecting your heart with competence, {name}. It works, but it's lonely in there. Today the tide favors letting one person see the unpolished version.",
+  "Your {sun} warmth is your superpower in relationships — but today, try receiving instead of radiating. Let someone take care of you for once. It won't make you weak; it'll make you known."
+],
+focus: [
+  "Your mind is sharpest when it has one true target, {name}. Today, pick the single task you've been circling and give it your first ninety minutes. The {phase} rewards depth over breadth.",
+  "Distraction is just curiosity without a leash. Your {sun} focus is formidable once aimed — aim it before noon and the whole day bends in your favor.",
+  "There's a project you've been 'thinking about' that is actually ready to begin. The thinking was the procrastination wearing a clever disguise. Your {moon} Moon knows it. Start badly; refine later.",
+  "Today favors finishing over starting. Look at what's 80% done in your life and push one thing across the line. Completion is a manifestation ritual — the universe notices follow-through.",
+  "Your energy peaks in the hours others waste, {name}. Guard your morning. Say no once today without explaining yourself; the {phase} backs your boundaries.",
+  "Clarity comes to you in motion, not in stillness. If you're stuck on a decision, take a walk and let your {moon} intuition do the deciding. The answer arrives around the second mile — or the second cup of coffee.",
+  "You do your best work when nobody's watching and the stakes feel personal. Manufacture that feeling today: tell yourself this one task is the one that proves something. Because it is.",
+  "The {phase} is a spotlight moon — it reveals what's been hiding in your workflow. An inefficiency you've tolerated for months finally annoys you enough to fix. Fix it today; future-you sends thanks.",
+  "Your {sun} determination is legendary among people who know you. Point it at the boring-but-important thing today. Glamour can wait; compound interest can't.",
+  "Information you need is coming from an unexpected direction today. Stay curious in conversations you'd normally tune out. Your next breakthrough is wearing a disguise."
+],
+luck: [
+  "Luck follows you when you move first, {name}. The {phase} favors the bold opening move — send the message, make the ask, take the meeting. Fortune is already leaning your way.",
+  "A small windfall of the non-financial kind is headed your way: a favor returned, a door held open, a compliment that lands exactly when you need it. Your {moon} Moon attracts quiet kindness.",
+  "Your lucky window today opens mid-afternoon. Schedule the important thing — the call, the pitch, the confession — between 2 and 5. The tide is with you then.",
+  "Serendipity is stalking you, {name}. Take a different route, talk to the stranger, open the email you'd normally archive. The {phase} hides gifts in detours.",
+  "Money energy is neutral-to-rising. Not a day for gambles, but an excellent day for asking what you're worth. Your {sun} confidence, deployed calmly, moves numbers.",
+  "Someone is about to underestimate you, and it will work entirely in your favor. Let them. The {phase} loves an underdog with a plan.",
+  "A number connected to your past — an old address, a childhood phone digit — appears today as a wink from the universe. Notice it. It's a reminder that your story has always been charmed.",
+  "Luck today isn't random; it's compound. Every disciplined choice you've made this month is maturing at once. Your {sun} persistence is the real lottery ticket.",
+  "Say yes to one small thing you'd normally decline. The {phase} rewards the open hand. What comes back will be disproportionate to what you gave.",
+  "Your intuition about timing is unusually sharp today, {name}. If something feels like 'now or never,' it's now. Trust the {moon} Moon's clock."
+],
+shadows: [
+  "You call it 'waiting for the right moment.' The stars call it stalling. Take one small step before noon — the moment is made, not found.",
+  "You listen beautifully to everyone except yourself lately. Tonight, ask what YOU want before you fall asleep. The answer might surprise you.",
+  "Your pride has been doing your talking for you. Let it rest today; vulnerability will get you further than polish.",
+  "You've been confusing 'busy' with 'aligned.' One of the things filling your calendar is draining your tide. You know which one.",
+  "You forgive others quickly and yourself never. The {phase} asks: what would change if you extended yourself the same grace?",
+  "Someone in your life has been dropping hints, not making requests, because they know you hate being told what to do. Hear the hint anyway.",
+  "Your standards are a gift until they become a cage. Today, let one thing be good enough. Perfection is just fear in a fancy coat.",
+  "You've been rehearsing a conversation instead of having it. The rehearsal is over, {name}. The real thing will go better than the script."
+],
+glances: [
+  "The thing you've been avoiding is smaller than you think. Poke it.",
+  "Someone's watching how you handle today. Handle it well.",
+  "Say the quiet part — gently. It lands better than you fear.",
+  "Your patience is a strategy, not a weakness. Deploy it.",
+  "A 'no' you give today protects a 'yes' you'll love tomorrow.",
+  "Stop rereading the message. Send it.",
+  "The detour IS the path today. Enjoy the scenery.",
+  "You're closer than you feel. One more push.",
+  "Someone owes you gratitude. It's arriving, disguised as a small favor.",
+  "Your gut already decided. Let your calendar catch up.",
+  "Be the person who texts first today.",
+  "What you water grows. Check what you've been watering.",
+  "The universe is not testing you. It's training you.",
+  "A door you stopped knocking on is unlocked now. Try the handle.",
+  "Your silence today says more than your words would. Use it wisely.",
+  "Fortune favors the ones who show up. Show up."
+]
+};
+
+/* ---- Oracle dice data: Planet × Sign × House ---- */
+const PLANETS = [
+  { n:'Sun',     g:'☉', line:"The Sun has marked you, {name}. What you do in the open today echoes for months — act like the sky is watching, because it is." },
+  { n:'Moon',    g:'☽', line:"The Moon leans close, {name}, and whispers: your feelings are data. The mood you've been dismissing is the message." },
+  { n:'Mercury', g:'☿', line:"Mercury quickens your tongue, {name}. Words you speak today travel further than you intend — choose them like spells." },
+  { n:'Venus',   g:'♀', line:"Venus turns her gaze on you, {name}. Beauty, money, and love are negotiating in your favor — let them." },
+  { n:'Mars',    g:'♂', line:"Mars lends you his fire, {name}. Strike today. Hesitation is the only enemy the gods see in your path." },
+  { n:'Jupiter', g:'♃', line:"Jupiter, the great benefactor, expands your luck, {name}. Think bigger than feels reasonable — the sky can hold it." },
+  { n:'Saturn',  g:'♄', line:"Saturn tests what you built, {name}. What survives this week was always real. Let the rest fall; it was scaffolding." },
+  { n:'Uranus',  g:'♅', line:"Uranus cracks the expected, {name}. A disruption coming your way is actually a rescue in disguise. Don't brace — surf." },
+  { n:'Neptune', g:'♆', line:"Neptune dissolves the veil, {name}. A dream you've dismissed as fantasy is instructions. Write it down before it fades." },
+  { n:'Pluto',   g:'♇', line:"Pluto works underground in your life, {name}. Something is ending so something truer can begin. Release it with grace." }
+];
+const SIGN_FLAVOR = [
+  "in Aries' bold fire — first to move, first to win",
+  "in Taurus' steady earth — what you build now lasts",
+  "in Gemini's quicksilver air — your words carry double weight",
+  "in Cancer's deep water — your intuition is never wrong this week",
+  "in Leo's radiant fire — take up space; you were made to be seen",
+  "in Virgo's precise earth — the details you master become your power",
+  "in Libra's balanced air — harmony you create returns to you threefold",
+  "in Scorpio's intense water — your depth is your weapon; wield it",
+  "in Sagittarius' wildfire — aim far; your arrow flies true",
+  "in Capricorn's mountain earth — slow, certain, unstoppable",
+  "in Aquarius' electric air — your strangest idea is your best one",
+  "in Pisces' boundless water — surrender is your strategy now"
+];
+const HOUSES = [
+  "the house of self — this is about who you are becoming",
+  "the house of wealth — watch your resources multiply",
+  "the house of voice — speak, write, be heard",
+  "the house of roots — home and family hold your answer",
+  "the house of creation — make something only you could make",
+  "the house of ritual — your daily habits are spells; cast them well",
+  "the house of partnership — another soul is central to this",
+  "the house of transformation — let the old skin go",
+  "the house of vision — expand your horizon, literally or otherwise",
+  "the house of destiny — your public path shifts now",
+  "the house of tribe — your people are gathering; find them",
+  "the house of dreams — the unconscious is speaking; listen"
+];
+const ORACLE_CLAIMS = [
+  "Within seven days, a message you almost didn't send will change the shape of a relationship.",
+  "Someone born under a water sign has been thinking about you since the last full moon.",
+  "The opportunity you've been waiting for already arrived — it's wearing work clothes.",
+  "A conversation before the next new moon will reveal who your real allies are.",
+  "You've been dreaming about the answer. The third detail in the next dream is the literal one.",
+  "Money you stopped expecting is closer than money you're chasing. Check the old thread.",
+  "Someone will test your boundaries this week to see if they're real. They are. Hold them.",
+  "The thing you do effortlessly — the thing you barely count as a skill — is about to become your leverage.",
+  "An elder's throwaway comment from years ago finally makes sense. That's your instruction now.",
+  "Your name is being spoken in a room you haven't entered yet. Walk in like you belong — you do."
+];
+function fill(str, ctx) {
+  return str.replace('{name}', ctx.name).replace('{sun}', ctx.sun)
+            .replace('{moon}', ctx.moon).replace('{phase}', ctx.phase);
+}
+
+/* Build the full daily reading. Deterministic per (user, day). */
+function buildReading(profile, date) {
+  const seed = profile.birthDate + '|' + localDateStr(date);
+  const rng = rngFor(seed);
+  const sun = SIGNS[sunSignIndex(new Date(profile.birthDate + 'T12:00:00'))];
+  const moon = SIGNS[moonSignIndex(new Date(profile.birthDate + 'T12:00:00'))];
+  const phase = moonPhase(date);
+  const ctx = { name: profile.name, sun: sun, moon: moon, phase: phase.name };
+  const energies = {
+    Love:  62 + Math.floor(rng() * 37),
+    Drive: 62 + Math.floor(rng() * 37),
+    Luck:  62 + Math.floor(rng() * 37),
+    Calm:  62 + Math.floor(rng() * 37)
+  };
+  return {
+    date: localDateStr(date),
+    pretty: prettyDate(date),
+    sun: sun, moon: moon, phase: phase,
+    glance: fill(pick(rng, COPY.glances), ctx),
+    open: fill(pick(rng, COPY.openers), ctx),
+    love: fill(pick(rng, COPY.love), ctx),
+    focus: fill(pick(rng, COPY.focus), ctx),
+    luck: fill(pick(rng, COPY.luck), ctx),
+    shadow: fill(pick(rng, COPY.shadows), ctx),
+    energies: energies
+  };
+}
+
+/* Build an oracle message from a dice roll. */
+function buildOracle(profile, roll) {
+  const planet = PLANETS[roll.planet];
+  const ctx = { name: profile.name, sun: '', moon: '', phase: '' };
+  const rng = rngFor(profile.birthDate + '|oracle|' + roll.planet + '-' + roll.sign + '-' + roll.house + '|' + roll.date);
+  return {
+    text: fill(planet.line, ctx) + ' It falls ' + SIGN_FLAVOR[roll.sign] + ', in ' +
+          HOUSES[roll.house] + '. ' + pick(rng, ORACLE_CLAIMS),
+    combo: planet.n + ' ' + planet.g + ' × ' + SIGNS[roll.sign] + ' ' + SIGN_GLYPHS[roll.sign] +
+           ' × House ' + (roll.house + 1)
+  };
+}
+
+/* ============ 5. ONBOARDING ============ */
+const $ = (id) => document.getElementById(id);
+let obStep = 0;
+function obShow(n) {
+  obStep = n;
+  document.querySelectorAll('.ob-step').forEach(el => el.classList.toggle('active', +el.dataset.step === n));
+  document.querySelectorAll('#ob-dots span').forEach((el, i) => el.classList.toggle('on', i === n));
+  $('ob-back').style.display = n === 0 ? 'none' : '';
+  $('ob-next').textContent = n === 2 ? 'Reveal my chart' : 'Continue';
+}
+function obValidate() {
+  let ok = true;
+  if (obStep === 0) {
+    const v = $('ob-name').value.trim();
+    $('err-name').textContent = v ? '' : 'The stars need a name.';
+    if (!v) ok = false;
+  }
+  if (obStep === 1) {
+    const v = $('ob-date').value;
+    let msg = '';
+    if (!v) msg = 'Your birth date is required.';
+    else {
+      const d = new Date(v + 'T12:00:00');
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      if (isNaN(d.getTime())) msg = 'That date doesn\u2019t look valid.';
+      else if (d > today) msg = 'Birth date can\u2019t be in the future.';
+      else if (d.getFullYear() < 1900) msg = 'Please enter a date after 1900.';
+    }
+    $('err-date').textContent = msg;
+    if (msg) ok = false;
+  }
+  if (obStep === 2) {
+    const v = $('ob-place').value.trim();
+    $('err-place').textContent = v ? '' : 'Your birthplace is required.';
+    if (!v) ok = false;
+  }
+  return ok;
+}
+function obFinish() {
+  const profile = {
+    name: $('ob-name').value.trim(),
+    birthDate: $('ob-date').value,
+    birthTime: $('ob-time').value || '12:00',
+    timeKnown: !!$('ob-time').value && $('ob-time').value !== '12:00',
+    birthplace: $('ob-place').value.trim(),
+    createdAt: Date.now()
+  };
+  if (!store.set('profile', profile)) { toast('Could not save — storage unavailable.'); return; }
+  enterApp();
+}
+
+/* ============ 6. TODAY VIEW ============ */
+function getProfile() { return store.get('profile', null); }
+function renderToday() {
+  const profile = getProfile();
+  if (!profile) return;
+  const now = new Date();
+  const r = buildReading(profile, now);
+  $('today-eyebrow').textContent = r.pretty;
+  $('today-title').textContent = 'Today for ' + profile.name;
+  $('today-phase-glyph').textContent = r.phase.glyph;
+  $('today-phase-text').textContent = r.phase.name + ' · ' + r.phase.illumination + '% illuminated';
+  $('glance').textContent = r.glance;
+  $('reading-open').textContent = r.open;
+  $('reading-love').textContent = r.love;
+  $('reading-focus').textContent = r.focus;
+  $('reading-luck').textContent = r.luck;
+  $('reading-shadow').textContent = r.shadow;
+  const m = $('meters'); m.innerHTML = '';
+  Object.keys(r.energies).forEach(k => {
+    const v = r.energies[k];
+    const wrap = document.createElement('div');
+    wrap.className = 'meter';
+    wrap.innerHTML = '<div class="row"><span>' + k + '</span><b>' + v + '%</b></div>' +
+                     '<div class="bar"><div class="fill" data-w="' + v + '"></div></div>';
+    m.appendChild(wrap);
+  });
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    m.querySelectorAll('.fill').forEach(el => { el.style.width = el.dataset.w + '%'; });
+  }));
+  // stash today's one-liner for sharing
+  store.set('todayGlance', { date: r.date, text: r.glance, pretty: r.pretty });
+}
+
+/* ============ 7. ORACLE DICE ============ */
+const ROMAN = ['Ⅰ','Ⅱ','Ⅲ','Ⅳ','Ⅴ','Ⅵ','Ⅶ','Ⅷ','Ⅸ','Ⅹ','Ⅺ','Ⅻ'];
+let rolling = false;
+function lastRollDate() { return store.get('lastRollDate', null); }
+function rollHistory() { return store.get('rollHistory', []); }
+function updateOracleUI() {
+  const today = localDateStr(new Date());
+  const rolled = lastRollDate() === today;
+  $('btn-roll').disabled = rolling;
+  $('btn-roll').textContent = rolling ? 'The dice are turning…' : (rolled ? 'Roll again (Premium)' : 'Roll the dice');
+  $('oracle-status').textContent = rolled
+    ? 'You\u2019ve used today\u2019s free roll. The gods rest until tomorrow — or upgrade.'
+    : 'One free roll each day.';
+}
+function doRoll() {
+  if (rolling) return;
+  const profile = getProfile();
+  if (!profile) return;
+  const today = localDateStr(new Date());
+  if (lastRollDate() === today) { openPremium(); return; } // freemium gate
+  rolling = true;
+  $('oracle-result').style.display = 'none';
+  updateOracleUI();
+  const dice = [$('die0'), $('die1'), $('die2')];
+  const final = {
+    planet: Math.floor(Math.random() * PLANETS.length),
+    sign: Math.floor(Math.random() * 12),
+    house: Math.floor(Math.random() * 12),
+    date: today
+  };
+  const glyphs = [
+    () => PLANETS[Math.floor(Math.random() * PLANETS.length)].g,
+    () => SIGN_GLYPHS[Math.floor(Math.random() * 12)],
+    () => ROMAN[Math.floor(Math.random() * 12)]
+  ];
+  const settleAt = [900, 1500, 2100];
+  const timers = dice.map((die, i) => {
+    die.classList.add('rolling'); die.classList.remove('settled');
+    return setInterval(() => {
+      die.querySelector('.glyph').textContent = glyphs[i]();
+    }, 80);
+  });
+  dice.forEach((die, i) => {
+    setTimeout(() => {
+      clearInterval(timers[i]);
+      die.classList.remove('rolling'); die.classList.add('settled');
+      const g = [PLANETS[final.planet].g, SIGN_GLYPHS[final.sign], ROMAN[final.house]][i];
+      die.querySelector('.glyph').textContent = g;
+      if (i === 2) finishRoll(profile, final);
+    }, settleAt[i]);
+  });
+}
+function finishRoll(profile, roll) {
+  rolling = false;
+  const oracle = buildOracle(profile, roll);
+  store.set('lastRollDate', roll.date);
+  const hist = rollHistory();
+  hist.unshift({ date: roll.date, combo: oracle.combo, text: oracle.text });
+  store.set('rollHistory', hist.slice(0, 7));
+  $('oracle-text').textContent = oracle.text;
+  $('oracle-combo').textContent = oracle.combo + ' · ' + prettyDate(new Date());
+  $('oracle-result').style.display = '';
+  renderHistory();
+  updateOracleUI();
+}
+function renderHistory() {
+  const hist = rollHistory();
+  const box = $('oracle-history');
+  if (!hist.length) { box.innerHTML = '<p class="faint" style="font-size:13px">No rolls yet. The dice are waiting.</p>'; return; }
+  box.innerHTML = '';
+  hist.forEach(h => {
+    const d = document.createElement('div');
+    d.className = 'hist';
+    d.innerHTML = '<b>' + h.combo + '</b><br>' + h.text;
+    box.appendChild(d);
+  });
+}
+
+/* ============ 8. RITUAL: check-in / streak / share ============ */
+function checkinDates() { return store.get('checkins', []); }
+function computeStreak() {
+  const dates = checkinDates();
+  if (!dates.length) return 0;
+  const set = new Set(dates);
+  let streak = 0;
+  const d = new Date();
+  if (!set.has(localDateStr(d))) d.setDate(d.getDate() - 1); // today not yet checked in
+  while (set.has(localDateStr(d))) { streak++; d.setDate(d.getDate() - 1); }
+  return streak;
+}
+function renderRitual() {
+  const streak = computeStreak();
+  $('streak-num').textContent = streak;
+  $('ritual-streak').textContent = streak;
+  const today = localDateStr(new Date());
+  const done = checkinDates().includes(today);
+  $('btn-checkin').disabled = done;
+  $('btn-checkin').textContent = done ? 'Tide received — see you tomorrow' : 'Check in with the tide';
+  $('ritual-moon').textContent = moonPhase(new Date()).glyph;
+}
+function doCheckin() {
+  const today = localDateStr(new Date());
+  const dates = checkinDates();
+  if (dates.includes(today)) return;
+  dates.push(today);
+  if (!store.set('checkins', dates)) { toast('Could not save check-in.'); return; }
+  renderRitual();
+  const s = computeStreak();
+  toast(s > 1 ? s + '-day streak. The tide favors the devoted.' : 'Day one. Every tide starts somewhere.');
+}
+async function doShare() {
+  const g = store.get('todayGlance', null);
+  const text = g ? '\u201C' + g.text + '\u201D — my AuraTide reading for ' + g.pretty + '. What\u2019s written in your stars?' : 'AuraTide — your daily oracle.';
+  try {
+    if (navigator.share) { await navigator.share({ title: 'AuraTide', text: text }); return; }
+  } catch (e) { if (e && e.name === 'AbortError') return; /* fall through to clipboard */ }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      toast('Copied — paste it anywhere.');
+      return;
+    }
+  } catch (e) { /* fall through */ }
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); toast('Copied — paste it anywhere.'); }
+  catch (e) { toast('Copy this: ' + text); }
+  document.body.removeChild(ta);
+}
+
+/* ============ 9. YOU VIEW ============ */
+function renderYou() {
+  const profile = getProfile();
+  if (!profile) return;
+  const birth = new Date(profile.birthDate + 'T' + (profile.birthTime || '12:00') + ':00');
+  const si = sunSignIndex(birth), mi = moonSignIndex(birth);
+  $('you-title').textContent = profile.name + ', in the sky';
+  $('you-sun-glyph').textContent = SIGN_GLYPHS[si];
+  $('you-sun').textContent = SIGNS[si];
+  $('you-moon-glyph').textContent = SIGN_GLYPHS[mi];
+  $('you-moon').textContent = SIGNS[mi];
+  const bp = moonPhase(birth);
+  $('you-born').textContent = 'Born ' + new Date(profile.birthDate + 'T12:00:00')
+    .toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) +
+    ' in ' + profile.birthplace + ', under a ' + bp.name + '.';
+  $('you-profile').textContent = profile.name + ' · ' + profile.birthDate +
+    (profile.timeKnown ? ' at ' + profile.birthTime : ' (time unknown — chart cast for noon)') +
+    ' · ' + profile.birthplace;
+}
+
+/* ============ 10. PREMIUM (PLACEHOLDER) ============
+   Phase 1: upsell screen only — NO payment code, NO network calls.
+   -- PHASE-2 HOOK: wire #btn-premium-cta to PayPal Subscriptions --
+   (PayPal JS SDK or subscription link; verify entitlement server-side
+   via webhook, mirror the PulseMatrix/BiteFact pattern: PayPal REST app
+   webhook -> server -> entitlement flag -> client unlocks features).
+   Until then, the button only records local interest. */
+function openPremium() { $('premium').classList.add('open'); }
+function closePremium() { $('premium').classList.remove('open'); }
+
+/* ============ 11. STARFIELD + BOOT ============ */
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function initStars() {
+  const c = $('stars'), ctx = c.getContext('2d');
+  let stars = [];
+  function resize() {
+    c.width = innerWidth; c.height = innerHeight;
+    stars = Array.from({ length: Math.min(140, innerWidth / 4) }, () => ({
+      x: Math.random() * c.width, y: Math.random() * c.height,
+      r: Math.random() * 1.4 + 0.3, p: Math.random() * Math.PI * 2,
+      s: 0.4 + Math.random() * 1.2
+    }));
+  }
+  resize();
+  addEventListener('resize', resize);
+  (function twinkle(t) {
+    ctx.clearRect(0, 0, c.width, c.height);
+    for (const st of stars) {
+      const a = 0.25 + 0.55 * Math.abs(Math.sin(t / 1000 * st.s + st.p));
+      ctx.globalAlpha = a;
+      ctx.fillStyle = '#bfe9ff';
+      ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(twinkle);
+  })(0);
+}
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === name));
+  document.querySelectorAll('.tabview').forEach(v => v.style.display = 'none');
+  $('tab-' + name).style.display = '';
+  if (name === 'today') renderToday();
+  if (name === 'oracle') { renderHistory(); updateOracleUI(); }
+  if (name === 'ritual') renderRitual();
+  if (name === 'you') renderYou();
+  window.scrollTo(0, 0);
+}
+function enterApp() {
+  $('onboard').classList.remove('active');
+  $('main').classList.add('active');
+  switchTab('today');
+}
+function wireEvents() {
+  $('ob-next').addEventListener('click', () => {
+    if (!obValidate()) return;
+    if (obStep < 2) obShow(obStep + 1); else obFinish();
+  });
+  $('ob-back').addEventListener('click', () => obShow(Math.max(0, obStep - 1)));
+  ['ob-name', 'ob-date', 'ob-place'].forEach(id => {
+    $(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') $('ob-next').click(); });
+  });
+  document.querySelectorAll('.tab').forEach(t =>
+    t.addEventListener('click', () => switchTab(t.dataset.tab)));
+  $('btn-roll').addEventListener('click', doRoll);
+  $('btn-checkin').addEventListener('click', doCheckin);
+  $('btn-share').addEventListener('click', doShare);
+  $('btn-edit').addEventListener('click', () => {
+    const p = getProfile();
+    if (p) { $('ob-name').value = p.name; $('ob-date').value = p.birthDate;
+             $('ob-time').value = p.birthTime || '12:00'; $('ob-place').value = p.birthplace; }
+    obShow(0);
+    $('main').classList.remove('active');
+    $('onboard').classList.add('active');
+    window.scrollTo(0, 0);
+  });
+  // Freemium gates -> premium placeholder
+  ['btn-tomorrow-lock', 'btn-more-rolls', 'btn-compat-lock', 'btn-premium-you']
+    .forEach(id => $(id).addEventListener('click', openPremium));
+  $('premium-close').addEventListener('click', closePremium);
+  $('premium').addEventListener('click', (e) => { if (e.target === $('premium')) closePremium(); });
+  $('btn-premium-cta').addEventListener('click', () => {
+    store.set('premiumInterest', { at: Date.now() });
+    toast('Noted — you\u2019ll be first to know.');
+    closePremium();
+  });
+  // PWA: register service worker (guarded; harmless if unsupported/offline)
+  if ('serviceWorker' in navigator) {
+    addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+}
+function boot() {
+  initStars();
+  wireEvents();
+  obShow(0);
+  if (getProfile()) enterApp();
+  else $('onboard').classList.add('active');
+}
+document.addEventListener('DOMContentLoaded', boot);
+</script>
+</body>
+</html>
