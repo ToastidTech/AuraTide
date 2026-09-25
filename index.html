@@ -410,8 +410,8 @@ p{margin:0 0 12px}
       <div class="perk"><span class="d">✦</span><span><b>Compatibility readings</b> — you, and anyone you choose.</span></div>
       <div class="perk"><span class="d">✦</span><span><b>Deeper daily readings</b> — longer, sharper, more personal.</span></div>
       <div class="plan-btns" id="premium-plans">
-        <a class="btn gold" href="https://www.paypal.com/ncp/payment/34ZVMH4WGQNQ2" target="_blank" rel="noopener">Monthly &middot; $9.99/mo</a>
-        <a class="btn" href="https://www.paypal.com/ncp/payment/UCWS6WJZCBMZ2" target="_blank" rel="noopener">Annual &middot; $59.99/yr <span class="save-badge">SAVE 50%</span></a>
+        <a class="btn gold" href="https://www.paypal.com/ncp/payment/34ZVMH4WGQNQ2" target="_blank" rel="noopener" data-plan="monthly" data-price="9.99">Monthly &middot; $9.99/mo</a>
+        <a class="btn" href="https://www.paypal.com/ncp/payment/UCWS6WJZCBMZ2" target="_blank" rel="noopener" data-plan="annual" data-price="59.99">Annual &middot; $59.99/yr <span class="save-badge">SAVE 50%</span></a>
         <a class="btn ghost" id="btn-purchase-done" href="mailto:info@toastidtech.com?subject=AuraTide%20Premium%20purchase&amp;body=Hi%2C%20I%20just%20purchased%20AuraTide%20Premium.%0A%0AName%3A%0APayPal%20email%3A%0ATransaction%20ID%3A%0APlan%20(monthly%20%249.99%20%2F%20annual%20%2459.99)%3A">I&rsquo;ve completed my purchase</a>
       </div>
       <div class="promo">
@@ -1148,6 +1148,15 @@ function wireEvents() {
   });
   // Promo code
   $('btn-promo-apply').addEventListener('click', applyPromo);
+  /* GA4 money moments: plan checkout + receipt-email intent */
+  document.querySelectorAll('#premium-plans a[data-plan]').forEach(function (a) {
+    a.addEventListener('click', function () {
+      try { gtag('event', 'begin_checkout', { currency: 'USD', value: parseFloat(a.dataset.price), items: [{ item_name: 'AuraTide Premium ' + a.dataset.plan }] }); } catch (_) {}
+    });
+  });
+  $('btn-purchase-done').addEventListener('click', function () {
+    try { gtag('event', 'purchase_intent', { currency: 'USD', value: 9.99 }); } catch (_) {}
+  });
   $('promo-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') applyPromo(); });
   $('premium-close').addEventListener('click', closePremium);
   $('premium').addEventListener('click', (e) => { if (e.target === $('premium')) closePremium(); });
