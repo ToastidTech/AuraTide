@@ -68,6 +68,9 @@ p{margin:0 0 12px}
 .btn.ghost{background:transparent;color:var(--blue);border:1px solid var(--card-border);box-shadow:none}
 .btn.gold{background:linear-gradient(135deg,var(--gold),#ffb84d);color:#241a02;box-shadow:0 6px 24px rgba(255,212,121,.25)}
 .btn:disabled{opacity:.45;cursor:default;transform:none}
+.plan-btns{display:grid;gap:10px;margin:4px 0 2px}
+.plan-btns .btn{text-decoration:none}
+.save-badge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.08em;background:#0f2a12;color:#7dffa8;border-radius:999px;padding:3px 10px;margin-left:8px;vertical-align:2px}
 .field{margin:0 0 16px}
 .field label{display:block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:7px}
 .field input{width:100%;padding:14px 15px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
@@ -398,7 +401,11 @@ p{margin:0 0 12px}
       <div class="perk"><span class="d">✦</span><span><b>Tomorrow's preview</b> — see the next tide before it arrives.</span></div>
       <div class="perk"><span class="d">✦</span><span><b>Compatibility readings</b> — you, and anyone you choose.</span></div>
       <div class="perk"><span class="d">✦</span><span><b>Deeper daily readings</b> — longer, sharper, more personal.</span></div>
-      <button class="btn gold" id="btn-premium-cta">Notify me at launch</button>
+      <div class="plan-btns" id="premium-plans">
+        <a class="btn gold" href="https://www.paypal.com/ncp/payment/34ZVMH4WGQNQ2" target="_blank" rel="noopener">Monthly &middot; $9.99/mo</a>
+        <a class="btn" href="https://www.paypal.com/ncp/payment/UCWS6WJZCBMZ2" target="_blank" rel="noopener">Annual &middot; $59.99/yr <span class="save-badge">SAVE 50%</span></a>
+        <button class="btn ghost" id="btn-purchase-done">I&rsquo;ve completed my purchase</button>
+      </div>
       <div class="promo">
         <p class="eyebrow" style="text-align:center">Have a promo code?</p>
         <div class="promo-row">
@@ -407,7 +414,7 @@ p{margin:0 0 12px}
         </div>
         <p class="err" id="promo-err" style="text-align:center"></p>
       </div>
-      <p class="placeholder-note" id="premium-note">PLACEHOLDER — no payment is processed. Phase 2 wires this screen to PayPal subscriptions. Tapping the button only saves your interest on this device.</p>
+      <p class="placeholder-note" id="premium-note">Secure checkout via PayPal &mdash; monthly or annual. After paying, tap &ldquo;I&rsquo;ve completed my purchase&rdquo; to unlock on this device.</p>
     </div>
   </div>
 </div>
@@ -993,19 +1000,18 @@ function renderYou() {
   $('btn-premium-you').textContent = isPremium() ? '\u2726 Premium active' : 'AuraTide Premium';
 }
 
-/* ============ 10. PREMIUM (PLACEHOLDER) ============
-   Phase 1: upsell screen only — NO payment code, NO network calls.
-   -- PHASE-2 HOOK: wire #btn-premium-cta to PayPal Subscriptions --
-   (PayPal JS SDK or subscription link; verify entitlement server-side
-   via webhook, mirror the PulseMatrix/BiteFact pattern: PayPal REST app
-   webhook -> server -> entitlement flag -> client unlocks features).
-   Until then, the button only records local interest. */
+/* ============ 10. PREMIUM ============
+   PayPal payment links (ncp) for monthly $9.99 and annual $59.99 plans.
+   Purchase confirmation follows the PulseMatrix pattern: the user taps
+   "I've completed my purchase" and the unlock is recorded locally.
+   -- Phase 2: verify entitlement server-side via PayPal webhook
+   (same pattern as PulseMatrix/BiteFact) instead of trusting the tap. */
 function openPremium() {
   const prem = isPremium();
-  $('btn-premium-cta').style.display = prem ? 'none' : '';
+  $('premium-plans').style.display = prem ? 'none' : '';
   $('premium-note').textContent = prem
     ? 'Premium is active on this device. The full tide is yours.'
-    : 'PLACEHOLDER — no payment is processed. Phase 2 wires this screen to PayPal subscriptions. Tapping the button only saves your interest on this device.';
+    : 'Secure checkout via PayPal \u2014 monthly or annual. After paying, tap \u201cI\u2019ve completed my purchase\u201d to unlock on this device.';
   $('premium').classList.add('open');
 }
 function closePremium() { $('premium').classList.remove('open'); }
@@ -1137,9 +1143,12 @@ function wireEvents() {
   $('promo-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') applyPromo(); });
   $('premium-close').addEventListener('click', closePremium);
   $('premium').addEventListener('click', (e) => { if (e.target === $('premium')) closePremium(); });
-  $('btn-premium-cta').addEventListener('click', () => {
-    store.set('premiumInterest', { at: Date.now() });
-    toast('Noted — you\u2019ll be first to know.');
+  $('btn-purchase-done').addEventListener('click', () => {
+    store.set('premiumUnlock', true);
+    renderTomorrow();
+    updateOracleUI();
+    renderYou();
+    toast('Premium unlocked \u2014 welcome to the full tide.');
     closePremium();
   });
   // PWA: register service worker (guarded; harmless if unsupported/offline)
