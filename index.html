@@ -404,7 +404,7 @@ p{margin:0 0 12px}
       <div class="plan-btns" id="premium-plans">
         <a class="btn gold" href="https://www.paypal.com/ncp/payment/34ZVMH4WGQNQ2" target="_blank" rel="noopener">Monthly &middot; $9.99/mo</a>
         <a class="btn" href="https://www.paypal.com/ncp/payment/UCWS6WJZCBMZ2" target="_blank" rel="noopener">Annual &middot; $59.99/yr <span class="save-badge">SAVE 50%</span></a>
-        <button class="btn ghost" id="btn-purchase-done">I&rsquo;ve completed my purchase</button>
+        <a class="btn ghost" id="btn-purchase-done" href="mailto:info@toastidtech.com?subject=AuraTide%20Premium%20purchase&amp;body=Hi%2C%20I%20just%20purchased%20AuraTide%20Premium.%0A%0AName%3A%0APayPal%20email%3A%0ATransaction%20ID%3A%0APlan%20(monthly%20%249.99%20%2F%20annual%20%2459.99)%3A">I&rsquo;ve completed my purchase</a>
       </div>
       <div class="promo">
         <p class="eyebrow" style="text-align:center">Have a promo code?</p>
@@ -414,7 +414,7 @@ p{margin:0 0 12px}
         </div>
         <p class="err" id="promo-err" style="text-align:center"></p>
       </div>
-      <p class="placeholder-note" id="premium-note">Secure checkout via PayPal &mdash; monthly or annual. After paying, tap &ldquo;I&rsquo;ve completed my purchase&rdquo; to unlock on this device.</p>
+      <p class="placeholder-note" id="premium-note">Secure checkout via PayPal &mdash; monthly or annual. After paying, tap &ldquo;I&rsquo;ve completed my purchase&rdquo; to email us your receipt &mdash; we&rsquo;ll activate Premium for you.</p>
     </div>
   </div>
 </div>
@@ -1002,16 +1002,16 @@ function renderYou() {
 
 /* ============ 10. PREMIUM ============
    PayPal payment links (ncp) for monthly $9.99 and annual $59.99 plans.
-   Purchase confirmation follows the PulseMatrix pattern: the user taps
-   "I've completed my purchase" and the unlock is recorded locally.
-   -- Phase 2: verify entitlement server-side via PayPal webhook
-   (same pattern as PulseMatrix/BiteFact) instead of trusting the tap. */
+   "I've completed my purchase" is a mailto: link — it opens the user's
+   email app addressed to info@toastidtech.com with a pre-filled receipt
+   template. No access is granted on tap; activation is manual until
+   Phase 2 adds server-side PayPal webhook verification. */
 function openPremium() {
   const prem = isPremium();
   $('premium-plans').style.display = prem ? 'none' : '';
   $('premium-note').textContent = prem
     ? 'Premium is active on this device. The full tide is yours.'
-    : 'Secure checkout via PayPal \u2014 monthly or annual. After paying, tap \u201cI\u2019ve completed my purchase\u201d to unlock on this device.';
+    : 'Secure checkout via PayPal \u2014 monthly or annual. After paying, tap \u201cI\u2019ve completed my purchase\u201d to email us your receipt \u2014 we\u2019ll activate Premium for you.';
   $('premium').classList.add('open');
 }
 function closePremium() { $('premium').classList.remove('open'); }
@@ -1143,14 +1143,8 @@ function wireEvents() {
   $('promo-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') applyPromo(); });
   $('premium-close').addEventListener('click', closePremium);
   $('premium').addEventListener('click', (e) => { if (e.target === $('premium')) closePremium(); });
-  $('btn-purchase-done').addEventListener('click', () => {
-    store.set('premiumUnlock', true);
-    renderTomorrow();
-    updateOracleUI();
-    renderYou();
-    toast('Premium unlocked \u2014 welcome to the full tide.');
-    closePremium();
-  });
+  /* #btn-purchase-done is a mailto: anchor — no JS needed. Tapping it
+     opens the user's email app; nothing unlocks until manual activation. */
   // PWA: register service worker (guarded; harmless if unsupported/offline)
   if ('serviceWorker' in navigator) {
     addEventListener('load', () => {

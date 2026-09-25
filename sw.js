@@ -1,5 +1,5 @@
 /* AuraTide service worker — cache-first app shell for offline use. */
-const CACHE = 'auratide-v4';
+const CACHE = 'auratide-v5';
 const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
